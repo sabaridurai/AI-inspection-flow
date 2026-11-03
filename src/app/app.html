@@ -1,0 +1,20 @@
+@if (isLoginPage()) {
+  <main class="auth-page"><router-outlet /></main>
+} @else {
+  <div class="app-frame">
+    <app-sidebar [open]="navigationOpen()" (closeNavigation)="closeNavigation()" />
+    <div class="workspace">
+      <app-header [open]="navigationOpen()" (menuToggle)="toggleNavigation()" />
+      @if (storageError(); as storageMessage) {<div class="storage-warning" role="alert">{{ storageMessage }}</div>}
+      @if (pendingSyncCount() > 0) {
+        <div class="sync-status" [class.sync-status-error]="syncState() === 'error'" role="status">
+          @if (syncState() === 'offline') {Offline: {{ pendingSyncCount() }} inspection(s) waiting to sync.}
+          @else if (syncState() === 'syncing') {Syncing {{ pendingSyncCount() }} inspection(s) to the database…}
+          @else if (syncState() === 'error') {Sync failed: {{ syncError() }}}
+          @else {{{ pendingSyncCount() }} inspection(s) waiting to sync.}
+        </div>
+      }
+      <main class="page-content"><router-outlet /></main>
+    </div>
+  </div>
+}

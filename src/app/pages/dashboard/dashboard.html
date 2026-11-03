@@ -1,0 +1,181 @@
+<section class="page-heading">
+  <div>
+    <div class="eyebrow">INSPECTION OVERVIEW</div>
+    <h1>Welcome, {{ firstName() }} <span class="wave">✳</span></h1>
+    <p>Here's what's happening across your inspections today.</p>
+  </div>
+  <a class="button button-primary" routerLink="/inspections">
+    <svg lucideIcon="plus" [size]="17"></svg> New inspection
+  </a>
+</section>
+
+<section class="metric-grid" aria-label="Inspection summary">
+  <article class="metric-card metric-ink">
+    <div class="metric-top">
+      <span>Total inspections</span>
+      <span class="metric-icon"><svg lucideIcon="clipboard-list" [size]="18"></svg></span>
+    </div>
+    <strong>{{ total() }}</strong>
+    <div class="metric-foot">Saved inspections</div>
+  </article>
+  <article class="metric-card">
+    <div class="metric-top">
+      <span>Completed</span>
+      <span class="metric-icon icon-green"><svg lucideIcon="clipboard-check" [size]="18"></svg></span>
+    </div>
+    <strong>{{ completed() }}</strong>
+    <div class="metric-foot">Marked complete</div>
+  </article>
+  <article class="metric-card">
+    <div class="metric-top">
+      <span>Pending</span>
+      <span class="metric-icon icon-amber"><svg lucideIcon="calendar-days" [size]="18"></svg></span>
+    </div>
+    <strong>{{ pending() }}</strong>
+    <div class="metric-foot">{{ locationCount() }} {{ locationCount() === 1 ? 'location' : 'locations' }} recorded</div>
+  </article>
+  <article class="metric-card">
+    <div class="metric-top">
+      <span>Critical defects</span>
+      <span class="metric-icon icon-red"><svg lucideIcon="circle-alert" [size]="18"></svg></span>
+    </div>
+    <strong>{{ critical() }}</strong>
+    <div class="metric-foot">From saved inspections</div>
+  </article>
+</section>
+
+<section class="surface outbox-panel" id="outbox" aria-labelledby="outbox-heading">
+  <div class="section-header">
+    <div>
+      <h2 id="outbox-heading">Inspection outbox</h2>
+      <p>{{ inspectionSync.pendingCount() }} locally saved {{ inspectionSync.pendingCount() === 1 ? 'inspection is' : 'inspections are' }} waiting for the primary database.</p>
+    </div>
+    <button class="button button-secondary" type="button"
+      (click)="syncOutbox()"
+      [disabled]="inspectionSync.pendingCount() === 0 || inspectionSync.state() === 'syncing' || inspectionSync.state() === 'offline'">
+      <svg lucideIcon="activity" [size]="16"></svg>
+      {{ inspectionSync.state() === 'syncing' ? 'Syncing…' : 'Sync now' }}
+    </button>
+  </div>
+
+  @if (inspectionSync.state() === 'offline') {
+    <p class="outbox-notice" role="status">You’re offline. Inspections will sync automatically when the connection returns.</p>
+  } @else if (inspectionSync.state() === 'syncing') {
+    <p class="outbox-notice" role="status">Uploading inspections and photos. Confirmed local copies will be cleared automatically.</p>
+  } @else if (inspectionSync.error()) {
+    <p class="outbox-error" role="alert">{{ inspectionSync.error() }} Queued inspections have not been deleted. Resolve the issue and select Sync now to retry.</p>
+  } @else if (inspectionSync.remoteError()) {
+    <p class="outbox-error" role="alert">Could not load inspection history from the primary database: {{ inspectionSync.remoteError() }}</p>
+  }
+
+  @if (inspectionSync.outboxItems().length) {
+    <div class="outbox-list">
+      @for (item of inspectionSync.outboxItems(); track item.record.id) {
+        <article class="outbox-item">
+          <a class="outbox-item-link" [routerLink]="['/inspections', item.record.id]">
+            <strong>{{ item.record.asset }}</strong>
+            <span>{{ item.record.id }} · {{ item.record.assetType }}</span>
+            <small>{{ item.record.location }} · {{ item.record.date }} · {{ item.record.checklist.length }} checks · {{ evidenceCount(item.record) }} photos</small>
+          </a>
+          <span class="outbox-status">{{ item.status === 'synced' ? 'Confirming' : 'Waiting to sync' }}</span>
+        </article>
+      }
+    </div>
+  } @else {
+    <div class="outbox-empty">
+      <svg lucideIcon="clipboard-check" [size]="20"></svg>
+      <span>No locally queued inspections. New inspections sync automatically when you’re online.</span>
+    </div>
+  }
+</section>
+
+<section class="dashboard-grid">
+  <article class="surface activity-panel">
+    <div class="section-header">
+      <div>
+        <h2>Recent inspections</h2>
+        <p>Latest activity</p>
+      </div>
+      <a class="text-link" routerLink="/inspections">
+        View all <svg lucideIcon="arrow-right" [size]="15"></svg>
+      </a>
+    </div>
+
+    @if (records().length) {
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ASSET</th>
+              <th>INSPECTOR</th>
+              <th>DATE</th>
+              <th>STATUS</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (record of records().slice(0, 4); track record.id) {
+              <tr>
+                <td>
+                  <a class="asset-link" [routerLink]="['/inspections', record.id]">
+                    <strong>{{ record.asset }}</strong>
+                    <span>{{ record.id }} · {{ record.location }}</span>
+                  </a>
+                </td>
+                <td>{{ record.inspector }}</td>
+                <td>{{ record.date }}</td>
+                <td>
+                  <span class="status-badge" [class]="'status-' + record.status.toLowerCase().replace(' ', '-')">
+                    {{ record.status }}
+                  </span>
+                </td>
+                <td>
+                  <a class="row-arrow" [routerLink]="['/inspections', record.id]" aria-label="Open inspection">
+                    <svg lucideIcon="arrow-right" [size]="16"></svg>
+                  </a>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else {
+      <div class="empty-state">
+        <span class="empty-icon"><svg lucideIcon="clipboard-list" [size]="22"></svg></span>
+        <strong>No inspections yet</strong>
+        <p>Create your first inspection to see activity here.</p>
+        <a class="button button-secondary" routerLink="/inspections">Browse inspections</a>
+      </div>
+    }
+  </article>
+
+  <aside class="surface side-activity">
+    <div class="section-header">
+      <div>
+        <h2>Needs attention</h2>
+        <p>Items to review</p>
+      </div>
+      <span class="attention-count">{{ critical() }}</span>
+    </div>
+    <div class="attention-list">
+      @if (attentionRecords().length) {
+        @for (record of attentionRecords(); track record.id) {
+          <a class="attention-item" [routerLink]="['/inspections', record.id]">
+            <span class="attention-mark">
+              <svg lucideIcon="circle-alert" [size]="17"></svg>
+            </span>
+            <span class="attention-copy">
+              <strong>{{ record.asset }}</strong>
+              <small>{{ record.defects }} {{ record.defects === 1 ? 'defect' : 'defects' }} · {{ record.location }}</small>
+            </span>
+            <svg class="attention-arrow" lucideIcon="arrow-right" [size]="15"></svg>
+          </a>
+        }
+      } @else {
+        <div class="empty-state compact">
+          <p>Nothing needs attention right now.</p>
+        </div>
+      }
+    </div>
+  </aside>
+</section>

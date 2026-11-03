@@ -1,0 +1,653 @@
+/* ============================================================
+   REPORTS — Google Material Theme
+   ============================================================ */
+:host {
+  display: block;
+  font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  color: #202124;
+}
+
+/* ============================================================
+   PAGE HEADING
+   ============================================================ */
+.page-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 24px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.eyebrow {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 1.4px;
+  color: #1a73e8; /* Google Blue */
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.page-heading h1 {
+  margin: 0 0 6px;
+  font-size: 28px;
+  line-height: 1.2;
+  font-weight: 400;
+  letter-spacing: -0.2px;
+  color: #202124;
+}
+
+.page-heading p {
+  margin: 0;
+  font-size: 14px;
+  color: #5f6368;
+  font-weight: 400;
+}
+
+.refresh-button:disabled,
+.download-button:disabled {
+  opacity: .55;
+  cursor: wait;
+}
+
+.report-message,
+.report-loading {
+  margin: 16px 22px;
+  padding: 11px 13px;
+  border-radius: 5px;
+  color: #5f6368;
+  background: #f1f3f4;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.report-error {
+  color: #a44430;
+  background: #fff0eb;
+}
+
+/* ============================================================
+   SURFACE
+   ============================================================ */
+.surface {
+  background: #ffffff;
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+}
+
+.reports-surface {
+  overflow: hidden;
+}
+
+/* ============================================================
+   REPORTS HEADER
+   ============================================================ */
+.reports-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 20px 22px 18px;
+  border-bottom: 1px solid #e8eaed;
+  flex-wrap: wrap;
+}
+
+.reports-header h2 {
+  margin: 0 0 4px;
+  font-size: 17px;
+  font-weight: 500;
+  letter-spacing: -0.1px;
+  color: #202124;
+}
+
+.reports-header p {
+  margin: 0;
+  font-size: 12.5px;
+  color: #5f6368;
+  font-weight: 400;
+}
+
+.reports-header > svg {
+  color: #1a73e8;
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   DATA TABLE
+   ============================================================ */
+.table-wrap {
+  overflow-x: auto;
+}
+
+.reports-table {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.reports-table thead th {
+  text-align: left;
+  padding: 12px 16px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.6px;
+  color: #5f6368;
+  text-transform: uppercase;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e8eaed;
+  white-space: nowrap;
+}
+
+.reports-table thead th:first-child {
+  padding-left: 22px;
+}
+
+.reports-table thead th:last-child {
+  padding-right: 22px;
+}
+
+.reports-table tbody td {
+  padding: 14px 16px;
+  border-bottom: 1px solid #f1f3f4;
+  color: #3c4043;
+  vertical-align: middle;
+}
+
+.reports-table tbody td:first-child {
+  padding-left: 22px;
+}
+
+.reports-table tbody td:last-child {
+  padding-right: 22px;
+  text-align: right;
+}
+
+.reports-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.reports-table tbody tr {
+  transition: background 0.12s ease;
+}
+
+.reports-table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+/* ============================================================
+   REPORT NAME CELL
+   ============================================================ */
+.report-name {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.report-file {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  color: #1a73e8;
+  background: #e8f0fe;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.report-name > span:last-child {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.report-name strong {
+  color: #202124;
+  font-size: 13.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.report-name small {
+  color: #80868b;
+  font-size: 11.5px;
+  font-weight: 400;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ============================================================
+   STATUS BADGES
+   ============================================================ */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+  text-transform: capitalize;
+}
+
+.status-badge.status-completed {
+  background: #e6f4ea;
+  color: #137333;
+}
+
+.status-badge.status-pending {
+  background: #fef7e0;
+  color: #b06000;
+}
+
+.status-badge.status-in-progress,
+.status-badge.status-inprogress {
+  background: #e8f0fe;
+  color: #1a73e8;
+}
+
+.status-badge.status-failed,
+.status-badge.status-critical {
+  background: #fce8e6;
+  color: #c5221f;
+}
+
+.status-badge.status-draft {
+  background: #f1f3f4;
+  color: #5f6368;
+}
+
+/* ============================================================
+   DEFECTS VALUE
+   ============================================================ */
+.defect-value {
+  color: #d93025;
+  font-weight: 500;
+}
+
+/* ============================================================
+   DOWNLOAD BUTTON
+   ============================================================ */
+.download-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 12px;
+  color: #1a73e8;
+  background: #ffffff;
+  border: 1px solid #dadce0;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.download-button:hover {
+  background: #f8f9fa;
+  border-color: #c6c9cd;
+}
+
+.download-button:active {
+  background: #f1f3f4;
+}
+
+.download-button svg {
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   EMPTY STATE
+   ============================================================ */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 48px 20px;
+  gap: 8px;
+}
+
+.empty-icon {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border-radius: 50%;
+  background: #f1f3f4;
+  color: #5f6368;
+  margin-bottom: 4px;
+}
+
+.empty-state strong {
+  font-size: 14px;
+  font-weight: 500;
+  color: #202124;
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 13px;
+  color: #5f6368;
+  max-width: 340px;
+  line-height: 1.5;
+}
+
+/* ============================================================
+   REPORTS FOOTNOTE
+   ============================================================ */
+.reports-footnote {
+  margin: 0 22px;
+  padding: 14px 0 18px;
+  color: #80868b;
+  border-top: 1px solid #e8eaed;
+  font-size: 11.5px;
+  line-height: 1.6;
+}
+
+/* ============================================================
+   RESPONSIVE — TABLET
+   ============================================================ */
+@media (max-width: 1024px) {
+  .page-heading h1 {
+    font-size: 25px;
+  }
+
+  .reports-header {
+    padding: 18px 18px 16px;
+  }
+
+  .reports-footnote {
+    margin: 0 18px;
+  }
+}
+
+/* ============================================================
+   RESPONSIVE — MOBILE
+   ============================================================ */
+@media (max-width: 760px) {
+  .page-heading {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .page-heading h1 {
+    font-size: 22px;
+  }
+
+  .page-heading p {
+    font-size: 13px;
+  }
+
+  .reports-header {
+    padding: 16px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .reports-header h2 {
+    font-size: 16px;
+  }
+
+  .reports-table {
+    min-width: 640px;
+  }
+
+  .reports-table thead th:nth-child(2),
+  .reports-table tbody td:nth-child(2) {
+    display: none; /* Hide inspector on mobile */
+  }
+
+  .reports-table thead th:first-child,
+  .reports-table tbody td:first-child {
+    padding-left: 16px;
+  }
+
+  .reports-table thead th:last-child,
+  .reports-table tbody td:last-child {
+    padding-right: 16px;
+  }
+
+  .download-button {
+    padding: 0 10px;
+  }
+
+  .download-button span {
+    display: none; /* Icon-only download on mobile */
+  }
+
+  .download-button {
+    width: 36px;
+    justify-content: center;
+  }
+
+  .reports-footnote {
+    margin: 0 16px;
+    padding: 12px 0 16px;
+    font-size: 11px;
+  }
+}
+
+/* ============================================================
+   RESPONSIVE — SMALL MOBILE
+   ============================================================ */
+@media (max-width: 520px) {
+  .page-heading h1 {
+    font-size: 20px;
+  }
+
+  .reports-table {
+    min-width: 520px;
+    font-size: 12.5px;
+  }
+
+  .reports-table thead th,
+  .reports-table tbody td {
+    padding: 10px 12px;
+  }
+
+  .reports-table thead th:nth-child(3),
+  .reports-table tbody td:nth-child(3) {
+    display: none; /* Hide date on very small screens */
+  }
+
+  .reports-table thead th:first-child,
+  .reports-table tbody td:first-child {
+    padding-left: 14px;
+  }
+
+  .reports-table thead th:last-child,
+  .reports-table tbody td:last-child {
+    padding-right: 14px;
+  }
+
+  .report-file {
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+  }
+
+  .report-name {
+    gap: 10px;
+  }
+
+  .report-name strong {
+    font-size: 13px;
+  }
+
+  .report-name small {
+    font-size: 11px;
+  }
+
+  .status-badge {
+    padding: 2px 8px;
+    font-size: 10.5px;
+  }
+
+  .download-button {
+    width: 32px;
+    height: 32px;
+  }
+
+  .reports-footnote {
+    margin: 0 14px;
+    padding: 12px 0 14px;
+    font-size: 10.5px;
+  }
+}
+
+/* ============================================================
+   TOUCH TARGETS
+   ============================================================ */
+@media (hover: none) and (pointer: coarse) {
+  .download-button {
+    min-height: 40px;
+    min-width: 40px;
+  }
+}
+
+.details-button {
+  padding: 7px 10px;
+  color: #1a73e8;
+  background: #fff;
+  border: 1px solid #dadce0;
+  border-radius: 4px;
+  font: inherit;
+  font-size: 12px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.details-button:hover {
+  background: #f8f9fa;
+}
+
+.reports-table .details-row:hover {
+  background: #fff;
+}
+
+.details-row > td {
+  padding: 18px 22px 22px !important;
+  background: #f8f9fa;
+  vertical-align: top !important;
+}
+
+.checklist-section + .checklist-section {
+  margin-top: 22px;
+}
+
+.checklist-section h3 {
+  margin: 0;
+  padding: 0 0 10px;
+  color: #287b5b;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.checklist-table {
+  min-width: 680px;
+  border: 1px solid #e8eaed;
+  background: #fff;
+}
+
+.checklist-table thead th:first-child,
+.checklist-table tbody td:first-child {
+  padding-left: 14px;
+}
+
+.checklist-table thead th:last-child,
+.checklist-table tbody td:last-child {
+  padding-right: 14px;
+}
+
+.check-description {
+  min-width: 180px;
+  font-weight: 500;
+}
+
+.check-remark {
+  min-width: 150px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.check-result {
+  display: inline-flex;
+  align-items: center;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.result-pass {
+  color: #137333;
+}
+
+.result-fail {
+  color: #c5221f;
+}
+
+.result-na,
+.result-unchecked,
+.evidence-missing {
+  color: #6f7478;
+}
+
+.evidence-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.evidence-card {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 128px;
+  margin: 0;
+  color: #5f6368;
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+.evidence-card img {
+  width: 128px;
+  height: 88px;
+  object-fit: cover;
+  border: 1px solid #dadce0;
+  border-radius: 4px;
+  background: #f1f3f4;
+}
+
+.evidence-card figcaption {
+  line-height: 1.4;
+}
+
+.evidence-card .evidence-missing {
+  padding-top: 5px;
+}
+
+.no-checklist {
+  margin: 0;
+  color: #6f7478;
+  font-size: 13px;
+}
+
+@media (max-width: 760px) {
+  .details-row > td {
+    padding: 14px 16px 18px !important;
+  }
+
+  .details-button {
+    padding: 6px 8px;
+  }
+}

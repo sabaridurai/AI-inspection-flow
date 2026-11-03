@@ -1,0 +1,28 @@
+spring:
+  ai:
+    model:
+      chat: none
+  datasource:
+    url: jdbc:h2:mem:inspection-auth-test;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+    locations: classpath:db/test-migration
+
+app:
+  jwt:
+    secret: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+    issuer: inspectra-test
+    access-token-minutes: 15
+  cors:
+    allowed-origins: http://localhost:4200
+  mail-credentials:
+    encryption-key: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+  auth:
+    bootstrap-email:
+    bootstrap-password:

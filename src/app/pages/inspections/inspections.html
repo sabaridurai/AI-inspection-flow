@@ -1,0 +1,244 @@
+<section class="page-heading">
+  <div>
+    <div class="eyebrow">OPERATIONS</div>
+    <h1>Inspections</h1>
+    <p>Track field work and keep every check accountable.</p>
+  </div>
+  <button class="button button-primary" type="button" (click)="openCreateForm()">
+    <svg lucideIcon="plus" [size]="17"></svg> New inspection
+  </button>
+</section>
+
+@if (creating()) {
+  <div class="create-overlay">
+    <button class="create-backdrop" type="button" aria-label="Close new inspection form" (click)="closeCreateForm()"></button>
+    <section class="create-dialog" role="dialog" aria-modal="true" aria-labelledby="create-inspection-title">
+      <div class="create-heading">
+        <div>
+          <div class="eyebrow">NEW RECORD</div>
+          <h2 id="create-inspection-title">Create inspection</h2>
+          <p>Enter the inspection details, then prepare its checklist.</p>
+        </div>
+        <button class="close-dialog" type="button" aria-label="Close" (click)="closeCreateForm()">
+          <svg lucideIcon="x" [size]="19"></svg>
+        </button>
+      </div>
+
+      <form [formGroup]="inspectionForm" (ngSubmit)="createInspection()">
+        <div class="form-grid">
+          <label>Asset name<input formControlName="asset" placeholder="e.g. Loading dock lift" required autofocus /></label>
+          <label>Asset type<input formControlName="assetType" placeholder="e.g. Hydraulic freight elevator" required (input)="resetChecklist()" /></label>
+          <label>Location<input formControlName="location" placeholder="Building, floor, or bay" required /></label>
+          <label>Inspector<input formControlName="inspector" placeholder="Assigned inspector" required /></label>
+          <label>Inspection date<input formControlName="date" type="date" required /></label>
+        </div>
+
+        @if (reusableTemplates().length) {
+          <div class="reuse-checklist">
+            <label>Reuse a saved checklist
+              <select [value]="selectedTemplateId()" (change)="selectedTemplateId.set($any($event.target).value)">
+                <option value="">Choose a checklist template</option>
+                @for (template of reusableTemplates(); track template.id) {
+                  <option [value]="template.id">{{ template.title }}</option>
+                }
+              </select>
+            </label>
+            <button class="button button-secondary" type="button" (click)="applyReusableTemplate()" [disabled]="!selectedTemplateId()">Use checklist</button>
+          </div>
+        }
+
+        <section class="generated-checklist" aria-live="polite">
+          <div class="checklist-heading">
+            <div>
+              <h3>Checklist generation</h3>
+              <p>Collect asset-specific details to tailor the inspection checks.</p>
+            </div>
+            <button class="button button-secondary generate-button" type="button" (click)="requestChecklistQuestions()" [disabled]="checklistLoading()">
+              <svg lucideIcon="sparkles" [size]="16"></svg>
+              {{ checklistLoading() ? 'Getting questions…' : checklistQuestions().length ? 'Refresh questions' : 'Get checklist questions' }}
+            </button>
+          </div>
+
+          @if (aiError()) {
+            <p class="ai-error" role="alert">{{ aiError() }}</p>
+          }
+          @if (checklistLoading()) {
+            <p class="ai-loading" role="status">Generating questions for {{ inspectionForm.controls.assetType.value }}…</p>
+          }
+
+          @if (checklistQuestions().length) {
+            <div class="context-form" [formGroup]="checklistContextForm">
+              @for (question of checklistQuestions(); track question.key) {
+                <label>{{ question.label }}
+                  @if (question.options?.length) {
+                    <select [formControlName]="question.key" required>
+                      <option value="" disabled>Select {{ question.label.toLowerCase() }}</option>
+                      @for (option of question.options; track option) {
+                        <option [value]="option">{{ option }}</option>
+                      }
+                    </select>
+                  } @else {
+                    <input [formControlName]="question.key" [attr.placeholder]="'Enter ' + question.label.toLowerCase()" required />
+                  }
+                </label>
+              }
+            </div>
+            <div class="checklist-actions">
+              <button class="button button-primary generate-button" type="button" (click)="generateChecklist()" [disabled]="checklistContextForm.invalid || checklistGenerating()">
+                <svg lucideIcon="sparkles" [size]="16"></svg>
+                {{ checklistGenerating() ? 'Generating checklist…' : generatedChecklist().length ? 'Regenerate checklist' : 'Generate checklist' }}
+              </button>
+            </div>
+          } @else {
+            <p class="checklist-placeholder">Get asset-specific questions before generating this checklist.</p>
+          }
+
+          @if (generatedChecklist().length) {
+            <div class="editable-checklist">
+              <div class="editable-checklist-heading">
+                <div>
+                  <h4>Edit checklist</h4>
+                  <p>Change sections and points before creating the inspection. Saved templates can be reused later.</p>
+                </div>
+              </div>
+
+              @for (section of generatedChecklist(); track $index; let sectionIndex = $index) {
+                <section class="editable-checklist-section">
+                  <div class="editable-section-heading">
+                    <label>Checklist area
+                      <input [value]="section.title" (input)="updateSectionTitle(sectionIndex, $event)" placeholder="Section name" />
+                    </label>
+                    <button class="text-action danger-action" type="button" (click)="removeChecklistSection(sectionIndex)" [attr.aria-label]="'Remove section ' + (section.title || sectionIndex + 1)">Remove area</button>
+                  </div>
+
+                  @for (item of section.items; track $index; let itemIndex = $index) {
+                    <div class="editable-checklist-point">
+                      <label>Inspection point
+                        <input [value]="item" (input)="updateChecklistItem(sectionIndex, itemIndex, $event)" placeholder="Enter an inspection point" />
+                      </label>
+                      @if (generatedChecklist().length > 1) {
+                        <label class="move-point">Move to area
+                          <select [value]="sectionIndex" (change)="moveChecklistPoint(sectionIndex, itemIndex, $event)">
+                            @for (target of generatedChecklist(); track $index; let targetIndex = $index) {
+                              @if (targetIndex !== sectionIndex) {
+                                <option [value]="targetIndex">{{ target.title || 'Untitled area ' + (targetIndex + 1) }}</option>
+                              }
+                            }
+                          </select>
+                        </label>
+                      }
+                      <button class="text-action danger-action" type="button" (click)="removeChecklistPoint(sectionIndex, itemIndex)" [attr.aria-label]="'Remove inspection point ' + (itemIndex + 1)">Remove</button>
+                    </div>
+                  }
+
+                  <button class="button button-secondary" type="button" (click)="addChecklistPoint(sectionIndex)">Add point to this area</button>
+                </section>
+              }
+
+              <button class="button button-secondary" type="button" (click)="addChecklistSection()">Add checklist area</button>
+
+              <label class="template-title-field">Reusable template name
+                <input [value]="templateTitle()" (input)="updateTemplateTitle($event)" placeholder="e.g. Monthly elevator inspection" />
+              </label>
+
+              <div class="save-template-actions">
+                <button class="button button-secondary" type="button" (click)="saveGeneratedTemplate()" [disabled]="!checklistReady() || templateSaveMessage() === 'Saved to the reusable checklist library.'">Save to reusable checklists</button>
+                @if (templateSaveMessage()) {
+                  <span role="status">{{ templateSaveMessage() }}</span>
+                }
+              </div>
+
+              @if (!checklistReady()) {
+                <p class="checklist-edit-hint" role="status">Enter a name for each area and a point for every row before continuing.</p>
+              }
+            </div>
+          }
+        </section>
+
+        <div class="create-actions">
+          <button class="button button-secondary" type="button" (click)="closeCreateForm()">Cancel</button>
+          <button class="button button-primary" type="submit" [disabled]="inspectionForm.invalid || checklistContextForm.invalid || !checklistReady()">Create inspection</button>
+        </div>
+      </form>
+    </section>
+  </div>
+}
+
+<section class="surface list-surface">
+  <div class="list-toolbar">
+    <label class="search-field">
+      <svg lucideIcon="search" [size]="17"></svg>
+      <input [formControl]="query" type="search" placeholder="Search assets, IDs, inspectors..." aria-label="Search inspections">
+    </label>
+    <div class="filter-control">
+      <svg lucideIcon="sliders-horizontal" [size]="16"></svg>
+      <select [value]="statusFilter()" (change)="statusFilter.set($any($event.target).value)">
+        <option>All statuses</option>
+        @for (status of statuses.slice(1); track status) {
+          <option [value]="status">{{ status }}</option>
+        }
+      </select>
+    </div>
+    <span class="result-count">{{ records().length }} records</span>
+  </div>
+
+  @if (records().length) {
+    <div class="table-wrap">
+      <table class="data-table inspections-table">
+        <thead>
+          <tr>
+            <th>INSPECTION</th>
+            <th>ASSET TYPE</th>
+            <th>LOCATION</th>
+            <th>INSPECTOR</th>
+            <th>DATE</th>
+            <th>STATUS</th>
+            <th>DEFECTS</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (record of records(); track record.id) {
+            <tr>
+              <td>
+                <a class="asset-link" [routerLink]="['/inspections', record.id]">
+                  <strong>{{ record.asset }}</strong>
+                  <span>{{ record.id }}</span>
+                </a>
+              </td>
+              <td>{{ record.assetType }}</td>
+              <td>{{ record.location }}</td>
+              <td>{{ record.inspector }}</td>
+              <td>{{ record.date }}</td>
+              <td>
+                <span class="status-badge" [class]="'status-' + record.status.toLowerCase().replace(' ', '-')">{{ record.status }}</span>
+              </td>
+              <td>
+                <span [class.defect-value]="record.defects > 0">{{ record.defects }}</span>
+              </td>
+              <td>
+                <a class="row-arrow" [routerLink]="['/inspections', record.id]" aria-label="Open inspection">
+                  <svg lucideIcon="arrow-right" [size]="16"></svg>
+                </a>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  } @else if (totalRecords()) {
+    <div class="empty-state">
+      <span class="empty-icon"><svg lucideIcon="clipboard-list" [size]="22"></svg></span>
+      <strong>No inspections match</strong>
+      <p>Try another search or clear the current status filter.</p>
+      <button class="button button-secondary" type="button" (click)="query.setValue(''); statusFilter.set('All statuses')">Clear filters</button>
+    </div>
+  } @else {
+    <div class="empty-state">
+      <span class="empty-icon"><svg lucideIcon="clipboard-list" [size]="22"></svg></span>
+      <strong>No inspections yet</strong>
+      <p>Create an inspection by entering its details and preparing a checklist.</p>
+      <button class="button button-primary" type="button" (click)="openCreateForm()">Create first inspection</button>
+    </div>
+  }
+</section>

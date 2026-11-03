@@ -1,0 +1,275 @@
+.topbar {
+  position: sticky;
+  z-index: 20;
+  top: 0;
+  display: flex;
+  min-height: 68px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 0 40px;
+  border-bottom: 1px solid var(--line);
+  background: rgb(255 255 255 / 94%);
+  backdrop-filter: blur(14px);
+}
+
+.topbar-leading,
+.topbar-actions {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+}
+
+.topbar-leading {
+  gap: 15px;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.breadcrumb strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.breadcrumb-divider {
+  color: #c0c7c2;
+}
+
+.topbar-actions {
+  gap: 8px;
+}
+
+.icon-button,
+.menu-toggle {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.icon-button:hover,
+.menu-toggle:hover {
+  border-color: var(--line);
+  background: #f7f8f6;
+  color: var(--ink);
+}
+
+.notification-button {
+  position: relative;
+}
+
+.notification-button > span {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 7px;
+  height: 7px;
+  border: 1.5px solid var(--white);
+  border-radius: 50%;
+  background: var(--coral);
+}
+
+.topbar-profile {
+  display: flex;
+  min-height: 40px;
+  align-items: center;
+  gap: 9px;
+  margin-left: 5px;
+  padding: 0 0 0 10px;
+  border: 0;
+  border-left: 1px solid var(--line);
+  background: transparent;
+  cursor: pointer;
+}
+
+.avatar {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 50%;
+  background: #e9efe9;
+  color: var(--green);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.avatar-small {
+  width: 32px;
+  height: 32px;
+}
+
+.profile-name {
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.profile-chevron {
+  color: var(--muted);
+}
+
+.menu-toggle,
+.mobile-brand {
+  display: none;
+}
+
+.menu-icon {
+  position: relative;
+  display: block;
+  width: 17px;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+  box-shadow: 0 -5px 0 currentColor, 0 5px 0 currentColor;
+  transition: background 150ms ease, box-shadow 150ms ease;
+}
+
+.menu-icon::before,
+.menu-icon::after {
+  position: absolute;
+  inset: 0;
+  width: 17px;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+  content: '';
+  opacity: 0;
+  transition: transform 150ms ease;
+}
+
+.menu-icon.is-open {
+  background: transparent;
+  box-shadow: none;
+}
+
+.menu-icon.is-open::before {
+  opacity: 1;
+  transform: rotate(45deg);
+}
+
+.menu-icon.is-open::after {
+  opacity: 1;
+  transform: rotate(-45deg);
+}
+
+:host a:focus-visible,
+:host button:focus-visible {
+  outline: 3px solid #71a98b;
+  outline-offset: 2px;
+}
+
+@media (max-width: 1100px) {
+  .topbar {
+    padding-right: 28px;
+    padding-left: 28px;
+  }
+}
+
+@media (max-width: 900px) {
+  .topbar {
+    min-height: 64px;
+    padding: 0 24px;
+  }
+
+  .menu-toggle,
+  .mobile-brand {
+    display: flex;
+  }
+
+  .menu-toggle {
+    display: grid;
+    margin-left: -8px;
+  }
+
+  .mobile-brand {
+    align-items: center;
+    gap: 8px;
+    color: var(--ink);
+    font: 800 16px/1 'Manrope', sans-serif;
+    letter-spacing: -0.6px;
+  }
+
+  .mobile-brand .brand-mark {
+    display: grid;
+    width: 30px;
+    height: 30px;
+    place-items: center;
+    border-radius: 7px;
+    background: var(--ink);
+    color: #fff;
+  }
+
+  .brand-period {
+    color: var(--green);
+  }
+
+  .breadcrumb {
+    display: none;
+  }
+
+  .topbar-actions {
+    gap: 2px;
+  }
+
+  .topbar-profile {
+    min-height: 36px;
+    margin-left: 1px;
+    padding-left: 7px;
+  }
+
+  .profile-name,
+  .profile-chevron,
+  .help-button {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .topbar {
+    min-height: 60px;
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  .topbar-leading {
+    gap: 8px;
+  }
+
+  .topbar-actions {
+    gap: 0;
+  }
+
+  .icon-button,
+  .menu-toggle {
+    width: 36px;
+    height: 36px;
+  }
+
+  .menu-toggle {
+    margin-left: -6px;
+  }
+
+  .mobile-brand {
+    gap: 6px;
+    font-size: 14px;
+  }
+
+  .mobile-brand .brand-mark {
+    width: 28px;
+    height: 28px;
+  }
+}

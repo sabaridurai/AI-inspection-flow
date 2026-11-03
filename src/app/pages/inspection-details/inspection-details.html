@@ -1,0 +1,224 @@
+@if (record(); as inspection) {
+  <a class="back-link" routerLink="/inspections">
+    <svg lucideIcon="arrow-left" [size]="16"></svg> All inspections
+  </a>
+
+  <section class="detail-heading">
+    <div>
+      <div class="eyebrow">{{ inspection.id }} · {{ inspection.date }}</div>
+      <h1>{{ inspection.asset }}</h1>
+      <p>{{ inspection.location }} <span>·</span> {{ inspection.inspector }}</p>
+    </div>
+    <div class="detail-heading-actions">
+      <!-- <button class="button button-secondary print-button" type="button" (click)="printPdf()">
+        Print / Save PDF
+      </button> -->
+      <span class="status-badge" [class]="'status-' + inspection.status.toLowerCase().replace(' ', '-')">
+        {{ inspection.status }}
+      </span>
+    </div>
+  </section>
+
+  <div class="detail-layout">
+    <section class="surface checklist-surface">
+      <div class="section-header">
+        <div>
+          <h2>Inspection checklist</h2>
+          <p>Record an outcome, notes, and images for each inspection point.</p>
+        </div>
+        <span class="check-count">{{ inspection.checklist.length }} items</span>
+      </div>
+
+      @if (checklistSections().length) {
+        <nav class="section-navigator" aria-label="Checklist sections">
+          <div class="section-tabs" role="tablist" aria-label="Checklist sections">
+            @for (section of checklistSections(); track $index; let sectionIndex = $index) {
+              <button
+                class="section-tab"
+                type="button"
+                role="tab"
+                [id]="'checklist-tab-' + sectionIndex"
+                [attr.aria-selected]="activeSectionIndex() === sectionIndex"
+                [attr.aria-controls]="'checklist-panel-' + sectionIndex"
+                [class.active]="activeSectionIndex() === sectionIndex"
+                [tabindex]="activeSectionIndex() === sectionIndex ? 0 : -1"
+                (click)="selectSection(sectionIndex)"
+                (keydown)="onSectionKeydown($event, sectionIndex)">
+                <span>{{ section.title }}</span>
+                <small>{{ sectionCompletedCount(section) }}/{{ section.items.length }}</small>
+              </button>
+            }
+          </div>
+          <div class="section-pager">
+            <span>Section {{ activeSectionIndex() + 1 }} of {{ checklistSections().length }}</span>
+            <button class="section-page-button" type="button" (click)="previousSection()" [disabled]="activeSectionIndex() === 0" aria-label="Previous section">
+              <svg lucideIcon="arrow-left" [size]="15"></svg>
+            </button>
+            <button class="section-page-button" type="button" (click)="nextSection()" [disabled]="activeSectionIndex() >= checklistSections().length - 1" aria-label="Next section">
+              <svg lucideIcon="arrow-right" [size]="15"></svg>
+            </button>
+          </div>
+        </nav>
+      }
+
+      @for (section of checklistSections(); track $index; let sectionIndex = $index) {
+        <section class="checklist-group" role="tabpanel"
+          [hidden]="activeSectionIndex() !== sectionIndex"
+          [id]="'checklist-panel-' + sectionIndex"
+          [attr.aria-labelledby]="'checklist-tab-' + sectionIndex"
+          tabindex="0">
+          <div class="checklist-group-heading">
+            <div>
+              <h3>{{ section.title }}</h3>
+              <p>{{ sectionCompletedCount(section) }} of {{ section.items.length }} checks completed</p>
+            </div>
+            <span class="section-progress">{{ sectionProgress(section) | number:'1.0-0' }}%</span>
+          </div>
+          <div class="section-progress-track"><span [style.width.%]="sectionProgress(section)"></span></div>
+          @for (item of section.items; track item.id; let index = $index) {
+            <article class="checklist-item">
+              <div class="item-title">
+                <span class="item-number">{{ section.startIndex + index + 1 }}</span>
+                <strong>{{ item.label }}</strong>
+              </div>
+
+              <div class="result-options" role="group" [attr.aria-label]="'Result for ' + item.label">
+                <button type="button"
+                  [class.selected-pass]="item.result === 'pass'"
+                  [attr.aria-pressed]="item.result === 'pass'"
+                  (click)="setResult(item.id, 'pass')">
+                  <svg lucideIcon="check" [size]="14"></svg> Pass
+                </button>
+                <button type="button"
+                  [class.selected-fail]="item.result === 'fail'"
+                  [attr.aria-pressed]="item.result === 'fail'"
+                  (click)="setResult(item.id, 'fail')">
+                  <svg lucideIcon="x" [size]="14"></svg> Fail
+                </button>
+                <button type="button"
+                  [class.selected-na]="item.result === 'na'"
+                  [attr.aria-pressed]="item.result === 'na'"
+                  (click)="setResult(item.id, 'na')">
+                  N/A
+                </button>
+              </div>
+
+              <textarea [value]="item.comment" (input)="updateComment(item.id, $event)"
+                placeholder="Add an observation or comment..."
+                [attr.aria-label]="'Comment for ' + item.label"></textarea>
+
+              <div class="item-evidence">
+                <div class="evidence-actions">
+                  <label class="upload-button">
+                    <svg lucideIcon="camera" [size]="16"></svg> Choose images
+                    <input type="file" accept="image/*" multiple (change)="addEvidence(item.id, $event)" />
+                  </label>
+                  <label class="upload-button">
+                    <svg lucideIcon="camera" [size]="16"></svg> Take photo
+                    <input type="file" accept="image/*" capture="environment" (change)="addEvidence(item.id, $event)" />
+                  </label>
+                </div>
+
+                @if (item.evidence.length) {
+                  <div class="evidence-gallery">
+                    @for (evidence of item.evidence; track evidence.id) {
+                      <div class="evidence-image">
+                        @if (evidenceUrls()[evidence.id]; as imageUrl) {
+                          <img [src]="imageUrl" [alt]="'Evidence for ' + item.label + ': ' + evidence.name" />
+                        } @else {
+                          <span class="evidence-loading">Loading image…</span>
+                        }
+                        <div>
+                          <span>{{ evidence.name }}</span>
+                          <button class="text-action danger-action" type="button" (click)="removeEvidence(item.id, evidence.id)">Remove</button>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            </article>
+          }
+        </section>
+      } @empty {
+        <div class="empty-state"><strong>No checklist sections</strong><p>This inspection has no checklist items to display.</p></div>
+      }
+
+      @if (evidenceError()) {
+        <p class="evidence-error" role="alert">{{ evidenceError() }}</p>
+      }
+      @if (inspectionService.persistenceError(); as persistenceError) {
+        <p class="evidence-error" role="alert">Offline save failed: {{ persistenceError }}</p>
+      }
+
+      <div class="checklist-footer">
+        <span>
+          <svg lucideIcon="circle-alert" [size]="15"></svg>
+          @if (inspectionService.persistenceState() === 'saving' || inspectionService.persistenceState() === 'loading') {
+            Saving changes to this device…
+          } @else if (inspectionService.persistenceState() === 'error') {
+            Changes could not be saved offline.
+          } @else if (!inspectionService.isLocallyAvailable(inspection.id)) {
+            Synced to the primary database. Open this inspection online to load its details and photos.
+          } @else {
+            Changes are saved on this device and available offline.
+          }
+        </span>
+        <button class="button button-primary save-button" type="button" (click)="save()">
+          <svg lucideIcon="clipboard-check" [size]="16"></svg>
+          {{ saved() ? 'Inspection saved' : 'Save inspection' }}
+        </button>
+      </div>
+    </section>
+
+    <aside class="surface detail-aside">
+      <div class="aside-icon">
+        <svg lucideIcon="file-check-2" [size]="19"></svg>
+      </div>
+      <h2>Inspection summary</h2>
+      <p>Progress updates as you complete each check.</p>
+
+      <div class="progress-summary">
+        <span>{{ completedCount() }} of {{ inspection.checklist.length }} completed</span>
+        <strong>{{ progress() | number:'1.0-0' }}%</strong>
+      </div>
+      <div class="progress-track">
+        <span [style.width.%]="progress()"></span>
+      </div>
+
+      <div class="summary-row">
+        <span>Asset type</span>
+        <strong>{{ inspection.assetType }}</strong>
+      </div>
+      @for (detail of inspection.checklistContext; track detail.label) {
+        <div class="summary-row">
+          <span>{{ detail.label }}</span>
+          <strong>{{ detail.value }}</strong>
+        </div>
+      }
+      <div class="summary-row">
+        <span>Defects reported</span>
+        <strong class="defect-value">{{ inspection.defects }}</strong>
+      </div>
+      <div class="summary-row">
+        <span>Evidence images</span>
+        <strong>{{ evidenceCount() }}</strong>
+      </div>
+    </aside>
+  </div>
+} @else if (inspectionService.persistenceState() === 'loading') {
+  <div class="surface missing-inspection">
+    <div class="empty-state">
+      <strong>Loading saved inspection…</strong>
+      <p>Retrieving this inspection from offline storage.</p>
+    </div>
+  </div>
+} @else {
+  <div class="surface missing-inspection">
+    <div class="empty-state">
+      <strong>Inspection not found</strong>
+      <p>This inspection may have been removed from the local preview.</p>
+      <a class="button button-secondary" routerLink="/inspections">Return to inspections</a>
+    </div>
+  </div>
+}

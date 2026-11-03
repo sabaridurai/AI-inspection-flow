@@ -1,0 +1,124 @@
+<div class="login-page">
+  <div class="login-shell">
+
+    <!-- Left: Brand Panel -->
+    <aside class="brand-panel" aria-label="Inspectra introduction">
+      <div class="brand-top">
+        <div class="logo" aria-label="Inspectra">
+          <span class="logo-icon">
+            <svg viewBox="0 0 48 48" width="22" height="22">
+              <path fill="#4285F4" d="M24 4C13 4 4 13 4 24s9 20 20 20 20-9 20-20S35 4 24 4z"/>
+              <path fill="#ffffff" d="M24 14c-5.5 0-10 4.5-10 10s4.5 10 10 10 10-4.5 10-10-4.5-10-10-10zm0 16c-3.3 0-6-2.7-6-6s2.7-6 6-6 6 2.7 6 6-2.7 6-6 6z"/>
+            </svg>
+          </span>
+          <span class="logo-text">inspectra<span class="logo-dot">.</span></span>
+        </div>
+      </div>
+
+      <div class="brand-body">
+        <span class="brand-tag">INSPECTION OPERATIONS</span>
+        <h1 class="brand-title">
+          Every detail.<br />
+          <span class="title-accent">Accounted for.</span>
+        </h1>
+        <p class="brand-desc">
+          Bring your inspections, findings, and reports together in one clear workspace.
+        </p>
+        <div class="brand-rule"></div>
+        <div class="brand-meta">
+          <span class="meta-dot"></span>
+          <span>A clearer view of every inspection</span>
+        </div>
+      </div>
+
+      <div class="brand-footer">
+        <span class="foot-text">© 2026 Inspectra</span>
+        <span class="foot-text">Trusted by operations teams</span>
+      </div>
+    </aside>
+
+    <!-- Right: Form Panel -->
+    <main class="form-panel">
+      <div class="form-card">
+        <div class="mobile-logo" aria-label="Inspectra">
+          <span class="logo-icon">
+            <svg viewBox="0 0 48 48" width="20" height="20">
+              <path fill="#4285F4" d="M24 4C13 4 4 13 4 24s9 20 20 20 20-9 20-20S35 4 24 4z"/>
+              <path fill="#ffffff" d="M24 14c-5.5 0-10 4.5-10 10s4.5 10 10 10 10-4.5 10-10-4.5-10-10-10zm0 16c-3.3 0-6-2.7-6-6s2.7-6 6-6 6 2.7 6 6-2.7 6-6 6z"/>
+            </svg>
+          </span>
+          <span class="logo-text">inspectra<span class="logo-dot">.</span></span>
+        </div>
+
+        <header class="form-header">
+          <span class="form-eyebrow">{{ mode() === 'login' ? 'WELCOME BACK' : 'GET STARTED' }}</span>
+          <h2 class="form-title">{{ mode() === 'login' ? 'Sign in to your account' : 'Create your account' }}</h2>
+          <p class="form-subtitle">{{ mode() === 'login' ? 'Enter your details to open the inspection workspace.' : 'Create an account to start using your inspection workspace.' }}</p>
+        </header>
+
+        <form [formGroup]="loginForm" (ngSubmit)="submit()" novalidate class="form-body">
+          @if (mode() === 'signup') {
+            <div class="field">
+              <label for="fullName">Full name</label>
+              <input id="fullName" type="text" formControlName="fullName" autocomplete="name"
+                placeholder="Your name" [attr.aria-invalid]="fullName.invalid && fullName.touched"
+                [attr.aria-describedby]="fullName.invalid && fullName.touched ? 'full-name-error' : null" />
+              @if (fullName.invalid && fullName.touched) {
+                <span class="field-error" id="full-name-error">
+                  {{ fullName.hasError('required') ? 'Enter your name.' : 'Name must be 120 characters or fewer.' }}
+                </span>
+              }
+            </div>
+          }
+
+          <div class="field">
+            <label for="email">Email address</label>
+            <input id="email" type="email" formControlName="email" autocomplete="username"
+              placeholder="you@company.com" [attr.aria-invalid]="email.invalid && email.touched"
+              [attr.aria-describedby]="email.invalid && email.touched ? 'email-error' : null" />
+            @if (email.invalid && email.touched) {
+              <span class="field-error" id="email-error">
+                {{ email.hasError('required') ? 'Enter your email address.' : 'Enter a valid email address.' }}
+              </span>
+            }
+          </div>
+
+          <div class="field">
+            <label for="password">Password</label>
+            <input id="password" type="password" formControlName="password"
+              [attr.autocomplete]="mode() === 'login' ? 'current-password' : 'new-password'"
+              placeholder="Enter your password" [attr.aria-invalid]="password.invalid && password.touched"
+              [attr.aria-describedby]="password.invalid && password.touched ? 'password-error' : null" />
+            @if (password.invalid && password.touched) {
+              <span class="field-error" id="password-error">
+                {{ password.hasError('required') ? 'Enter a password to continue.' : 'Use at least 8 characters.' }}
+              </span>
+            }
+          </div>
+
+          @if (errorMessage()) {
+            <p class="form-alert" role="alert">{{ errorMessage() }}</p>
+          }
+
+          <button class="submit-btn" type="submit" [disabled]="submitting()">
+            <span class="submit-label">
+              {{ submitting() ? (mode() === 'login' ? 'Signing in…' : 'Creating account…') : (mode() === 'login' ? 'Sign in' : 'Create account') }}
+            </span>
+            <span class="submit-arrow" aria-hidden="true">→</span>
+          </button>
+        </form>
+
+        <footer class="form-footer">
+          <p class="switch-text">
+            {{ mode() === 'login' ? 'New to Inspectra?' : 'Already have an account?' }}
+            <button type="button" class="switch-btn" (click)="toggleMode()" [disabled]="submitting()">
+              {{ mode() === 'login' ? 'Create an account' : 'Sign in' }}
+            </button>
+          </p>
+          <p class="footnote">Your access token stays in memory and is cleared when this page reloads.</p>
+        </footer>
+      </div>
+    </main>
+
+  </div>
+</div>

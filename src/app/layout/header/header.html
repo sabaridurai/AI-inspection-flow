@@ -1,0 +1,13 @@
+<header class="topbar">
+	<div class="topbar-leading">
+		<button class="menu-toggle" type="button" [attr.aria-label]="open() ? 'Close navigation' : 'Open navigation'" aria-controls="primary-navigation" [attr.aria-expanded]="open()" (click)="menuToggle.emit()"><span class="menu-icon" [class.is-open]="open()" aria-hidden="true"></span></button>
+		<a class="mobile-brand" routerLink="/dashboard" aria-label="Inspectra home"><span class="brand-mark"><svg lucideIcon="activity" [size]="18"></svg></span><span>inspectra<span class="brand-period">.</span></span></a>
+		<div class="breadcrumb"><span>Workspace</span><span class="breadcrumb-divider">/</span><strong>Operations</strong></div>
+	</div>
+	<div class="topbar-actions">
+		<button class="icon-button search-shortcut" type="button" aria-label="Search"><svg lucideIcon="search" [size]="18"></svg></button>
+		<button class="icon-button help-button" type="button" aria-label="Help"><svg lucideIcon="circle-help" [size]="18"></svg></button>
+		<button class="icon-button notification-button" type="button" aria-label="Notifications"><svg lucideIcon="bell" [size]="18"></svg><span aria-hidden="true"></span></button>
+		<button class="topbar-profile" type="button" [attr.aria-label]="'Account: ' + displayName()"><span class="avatar avatar-small">{{ initials() }}</span><span class="profile-name">{{ displayName() }}</span><svg class="profile-chevron" lucideIcon="chevron-down" [size]="15"></svg></button>
+	</div>
+</header>

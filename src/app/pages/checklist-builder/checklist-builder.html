@@ -1,0 +1,152 @@
+<section class="page-heading">
+  <div>
+    <div class="eyebrow">CHECKLIST STUDIO</div>
+    <h1>Checklist templates</h1>
+    <p>Browse reusable checklists or create a template for your team.</p>
+  </div>
+  <button class="button button-primary" type="button" (click)="startChecklistGeneration()">
+    <svg lucideIcon="plus" [size]="17"></svg> Generate checklist
+  </button>
+</section>
+
+@if (message(); as notice) {
+  <p class="template-message" [class.message-error]="notice.error" role="status">{{ notice.text }}</p>
+}
+
+<section class="surface library-surface">
+  <div class="library-toolbar">
+    <label class="library-search">
+      <svg lucideIcon="search" [size]="17"></svg>
+      <input type="search" [value]="query()" (input)="query.set($any($event.target).value)"
+        placeholder="Search templates, asset types, purpose..."
+        aria-label="Search checklist templates">
+    </label>
+
+    <label class="filter-field">
+      <span>Asset type</span>
+      <select [value]="assetTypeFilter()" (change)="assetTypeFilter.set($any($event.target).value)">
+        <option value="ALL">All asset types</option>
+        @for (type of assetTypes(); track type.id) {
+          <option [value]="type.name">{{ type.name }}</option>
+        }
+      </select>
+    </label>
+
+    <label class="filter-field">
+      <span>Status</span>
+      <select [value]="statusFilter()" (change)="statusFilter.set($any($event.target).value)">
+        <option value="ALL">All statuses</option>
+        <option value="ACTIVE">Active</option>
+        <option value="DRAFT">Draft</option>
+        <option value="ARCHIVED">Archived</option>
+      </select>
+    </label>
+
+    <label class="filter-field">
+      <span>Source</span>
+      <select [value]="sourceFilter()" (change)="sourceFilter.set($any($event.target).value)">
+        <option value="ALL">All sources</option>
+        <option value="AI_GENERATED">AI generated</option>
+        <option value="USER_CREATED">Created by you</option>
+      </select>
+    </label>
+  </div>
+
+  <div class="library-summary">
+    <strong>{{ templates().length }} templates</strong>
+    <span>{{ categories().length }} asset categories</span>
+  </div>
+
+  @if (templates().length) {
+    <div class="template-grid">
+      @for (template of templates(); track template.id) {
+        <article class="template-card">
+          <div class="template-card-top">
+            <span class="template-type">{{ template.assetType }}</span>
+            <span class="template-status" [class]="'status-' + template.status.toLowerCase()">{{ template.status }}</span>
+          </div>
+
+          <h2>{{ template.title }}</h2>
+          <p class="template-description">{{ template.description }}</p>
+
+          <div class="template-meta">
+            <span>{{ sourceLabel(template.source) }}</span>
+            <span>v{{ template.version }}</span>
+            <span>{{ template.sections.length }} sections · {{ countQuestions(template.sections) }} questions</span>
+          </div>
+
+          <p class="template-purpose"><strong>Purpose</strong> {{ template.inspectionPurpose }}</p>
+
+          <div class="template-actions">
+            <button class="button button-secondary" type="button" (click)="preview(template)">Preview</button>
+            <button class="button button-secondary" type="button" (click)="duplicate(template)">Duplicate</button>
+            @if (template.source !== 'SYSTEM' && template.status !== 'ARCHIVED') {
+              <button class="button button-secondary" type="button" (click)="archive(template)">Archive</button>
+            }
+            @if (template.source !== 'SYSTEM') {
+              @if (pendingDeleteId() === template.id) {
+                <span class="delete-confirm">
+                  <span>Delete?</span>
+                  <button type="button" (click)="confirmDelete(template)">Confirm</button>
+                  <button type="button" (click)="cancelDelete()">Cancel</button>
+                </span>
+              } @else {
+                <button class="text-action danger-action" type="button" (click)="requestDelete(template)">Delete</button>
+              }
+            }
+          </div>
+        </article>
+      }
+    </div>
+  } @else {
+    <div class="empty-state">
+      <span class="empty-icon"><svg lucideIcon="clipboard-list" [size]="22"></svg></span>
+      <strong>No templates match</strong>
+      <p>Try changing the search or filters, or generate and save a checklist for reuse.</p>
+      <button class="button button-primary" type="button" (click)="startChecklistGeneration()">Generate checklist</button>
+    </div>
+  }
+</section>
+
+@if (selectedTemplate(); as template) {
+  <div class="create-overlay">
+    <button class="create-backdrop" type="button" aria-label="Close template preview" (click)="closePreview()"></button>
+    <section class="create-dialog template-preview-dialog" role="dialog" aria-modal="true" aria-labelledby="template-preview-title">
+      <div class="create-heading">
+        <div>
+          <div class="eyebrow">{{ template.assetType }} · {{ sourceLabel(template.source) }} · v{{ template.version }}</div>
+          <h2 id="template-preview-title">{{ template.title }}</h2>
+          <p>{{ template.description }}</p>
+        </div>
+        <button class="close-dialog" type="button" aria-label="Close" (click)="closePreview()">
+          <svg lucideIcon="x" [size]="19"></svg>
+        </button>
+      </div>
+
+      <p class="template-preview-purpose">
+        <strong>Inspection purpose</strong> {{ template.inspectionPurpose }}
+      </p>
+
+      @for (section of template.sections; track section.id) {
+        <section class="preview-section">
+          <h3>{{ section.displayOrder }}. {{ section.title }}</h3>
+          <p>{{ section.description }}</p>
+          <ol>
+            @for (item of section.items; track item.id) {
+              <li>
+                <strong>{{ item.question }}</strong>
+                <span>{{ item.instructions || item.acceptanceCriteria || 'No additional instructions.' }}</span>
+                <small>{{ item.responseType }} · {{ item.severity }} · {{ item.required ? 'Required' : 'Optional' }}{{ item.photoEvidenceRequired ? ' · Photo evidence' : '' }}</small>
+              </li>
+            }
+          </ol>
+        </section>
+      }
+
+      <div class="create-actions">
+        <button class="button button-secondary" type="button" (click)="closePreview()">Close</button>
+        <button class="button button-primary" type="button" (click)="duplicate(template)">Duplicate to edit</button>
+      </div>
+    </section>
+  </div>
+}

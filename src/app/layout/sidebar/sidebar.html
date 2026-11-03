@@ -1,0 +1,18 @@
+<button class="sidebar-backdrop" type="button" aria-label="Close navigation" (click)="closeNavigation.emit()"></button>
+<aside id="primary-navigation" class="sidebar" [class.is-open]="open()">
+	<a class="brand" routerLink="/dashboard" aria-label="Inspectra home" (click)="closeNavigation.emit()">
+		<span class="brand-mark"><svg lucideIcon="activity" [size]="20"></svg></span>
+		<span>inspectra<span class="brand-period">.</span></span>
+	</a>
+	<div class="workspace-label">WORKSPACE</div>
+	<nav class="nav-list" aria-label="Main navigation" (click)="closeNavigation.emit()">
+		<a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"><svg lucideIcon="chart-no-axes-combined" [size]="18"></svg><span>Overview</span></a>
+		<a routerLink="/inspections" routerLinkActive="active"><svg lucideIcon="clipboard-list" [size]="18"></svg><span>Inspections</span><span class="nav-count">{{ inspectionCount() }}</span></a>
+		<a routerLink="/checklist-builder" routerLinkActive="active"><svg lucideIcon="clipboard-list" [size]="18"></svg><span>Checklist templates</span></a>
+		<a routerLink="/reports" routerLinkActive="active"><svg lucideIcon="clipboard-check" [size]="18"></svg><span>Reports</span></a>
+	</nav>
+	<div class="sidebar-bottom">
+		<a routerLink="/settings" routerLinkActive="active" (click)="closeNavigation.emit()"><svg lucideIcon="settings" [size]="18"></svg><span>Settings</span></a>
+		<div class="sidebar-user"><div class="avatar">{{ initials() }}</div><div><strong>{{ displayName() }}</strong><span>Signed-in user</span></div><span class="presence-dot"></span></div>
+	</div>
+</aside>

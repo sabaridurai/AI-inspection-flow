@@ -1,0 +1,166 @@
+<section class="page-heading">
+  <div>
+    <div class="eyebrow">RECORDS &amp; EXPORTS</div>
+    <h1>Reports</h1>
+    <p>Generate PDF reports from inspections stored in the primary database.</p>
+  </div>
+  <button class="button button-secondary refresh-button" type="button"
+    (click)="refresh()" [disabled]="inspectionSync.remoteLoading()">
+    <svg lucideIcon="activity" [size]="16"></svg>
+    {{ inspectionSync.remoteLoading() ? 'Loading…' : 'Refresh reports' }}
+  </button>
+</section>
+
+<section class="surface reports-surface">
+  <div class="reports-header">
+    <div>
+      <h2>Primary database inspections</h2>
+      <p>{{ records().length }} {{ records().length === 1 ? 'inspection' : 'inspections' }} available</p>
+    </div>
+    <svg lucideIcon="file-check-2" [size]="20"></svg>
+  </div>
+
+  @if (inspectionSync.remoteError()) {
+    <div class="report-message report-error" role="alert">
+      Could not load reports from the primary database: {{ inspectionSync.remoteError() }}
+    </div>
+  } @else if (reportError()) {
+    <div class="report-message report-error" role="alert">{{ reportError() }}</div>
+  }
+
+  @if (inspectionSync.remoteLoading() && !records().length) {
+    <div class="report-loading" role="status">Loading inspections from the primary database…</div>
+  } @else if (records().length) {
+    <div class="table-wrap">
+      <table class="data-table reports-table">
+        <thead>
+          <tr>
+            <th>REPORT</th>
+            <th>INSPECTOR</th>
+            <th>DATE</th>
+            <th>STATUS</th>
+            <th>DEFECTS</th>
+            <th>PHOTOS</th>
+            <th>CHECKLIST</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (record of records(); track record.id) {
+            <tr>
+              <td>
+                <div class="report-name">
+                  <span class="report-file"><svg lucideIcon="clipboard-check" [size]="16"></svg></span>
+                  <span>
+                    <strong>{{ record.asset }}</strong>
+                    <small>{{ record.id }} · Inspection summary</small>
+                  </span>
+                </div>
+              </td>
+              <td>{{ record.inspector }}</td>
+              <td>{{ record.date }}</td>
+              <td>
+                <span class="status-badge" [class]="'status-' + record.status.toLowerCase().replace(' ', '-')">
+                  {{ record.status }}
+                </span>
+              </td>
+              <td>
+                <span [class.defect-value]="record.defects > 0">{{ record.defects }}</span>
+              </td>
+              <td>{{ evidenceCount(record) }}</td>
+              <td>
+                <button class="details-button" type="button" (click)="toggleDetails(record)"
+                  [attr.aria-expanded]="expandedRecordId() === record.id"
+                  [attr.aria-label]="(expandedRecordId() === record.id ? 'Hide' : 'View') + ' checklist for ' + record.asset">
+                  {{ expandedRecordId() === record.id ? 'Hide details' : 'View details' }}
+                </button>
+              </td>
+              <td>
+                <button class="download-button" type="button" (click)="downloadPdf(record)"
+                  [disabled]="generatingId() === record.id"
+                  [attr.aria-label]="'Download report for ' + record.asset">
+                  <svg lucideIcon="download" [size]="16"></svg>
+                  <span>{{ generatingId() === record.id ? 'Generating PDF…' : 'Download PDF' }}</span>
+                </button>
+              </td>
+            </tr>
+            @if (expandedRecordId() === record.id) {
+              <tr class="details-row">
+                <td colspan="8">
+                  @if (record.checklist.length) {
+                    @for (section of checklistSections(record); track section.title) {
+                      <section class="checklist-section">
+                        <h3>{{ section.title }}</h3>
+                        <div class="table-wrap checklist-table-wrap">
+                          <table class="data-table checklist-table">
+                            <thead>
+                              <tr>
+                                <th>DESCRIPTION</th>
+                                <th>RESULT</th>
+                                <th>REMARK</th>
+                                <th>EVIDENCE</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              @for (item of section.items; track item.id) {
+                                <tr>
+                                  <td class="check-description">{{ item.label }}</td>
+                                  <td>
+                                    <span class="check-result"
+                                      [class.result-pass]="item.result === 'pass'"
+                                      [class.result-fail]="item.result === 'fail'"
+                                      [class.result-na]="item.result === 'na'"
+                                      [class.result-unchecked]="item.result === null"
+                                      [attr.aria-label]="resultLabel(item.result)">
+                                      {{ resultLabel(item.result) }}
+                                    </span>
+                                  </td>
+                                  <td class="check-remark">{{ item.comment.trim() || '—' }}</td>
+                                  <td>
+                                    @if (item.evidence.length) {
+                                      <div class="evidence-list">
+                                        @for (evidence of item.evidence; track evidence.id) {
+                                          <figure class="evidence-card">
+                                            @if (evidenceUrls()[evidence.id]) {
+                                              <img [src]="evidenceUrls()[evidence.id]"
+                                                [alt]="'Evidence for ' + item.label + ': ' + evidence.name">
+                                              <figcaption>{{ evidence.name }}</figcaption>
+                                            } @else if (evidenceStates()[evidence.id] === 'loading') {
+                                              <figcaption>Loading {{ evidence.name }}…</figcaption>
+                                            } @else {
+                                              <figcaption class="evidence-missing">Not captured</figcaption>
+                                            }
+                                          </figure>
+                                        }
+                                      </div>
+                                    } @else {
+                                      <span class="evidence-missing">Not captured</span>
+                                    }
+                                  </td>
+                                </tr>
+                              }
+                            </tbody>
+                          </table>
+                        </div>
+                      </section>
+                    }
+                  } @else {
+                    <p class="no-checklist">No checklist items are available for this inspection.</p>
+                  }
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  } @else {
+    <div class="empty-state">
+      <span class="empty-icon"><svg lucideIcon="file-check-2" [size]="22"></svg></span>
+      <strong>No primary database inspections</strong>
+      <p>Reports appear here after inspections have synced to the primary database.</p>
+    </div>
+  }
+
+  <div class="reports-footnote">Expand a report to review section-based checklist results, remarks, and available evidence. PDFs include the same checklist details; unavailable photos are marked “Not captured.”</div>
+</section>
